@@ -16,6 +16,7 @@
 # Mono auto generated files
 mono_crash.*
 .idea/
+Dockerfile
 
 # Build results
 [Dd]ebug/

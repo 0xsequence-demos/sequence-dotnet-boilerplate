@@ -15,6 +15,10 @@ WORKDIR /app
 
 COPY --from=build /out ./
 
+ENV WAAS_CONFIG_KEY="<INSERT HERE>"
+ENV PROJECT_ACCESS_KEY="<INSERT HERE>"
+ENV EOA_PRIVATE_KEY="<INSERT HERE>"
+
 EXPOSE 80
 
 ENTRYPOINT ["dotnet", "SequenceDotNetBoilerplate.dll"]

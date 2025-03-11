@@ -5,6 +5,8 @@ using Sequence.Contracts;
 using Sequence.EmbeddedWallet;
 using Sequence.Provider;
 using Sequence.Utils;
+using Sequence.Wallet;
+using IWallet = Sequence.EmbeddedWallet.IWallet;
 
 namespace SequenceDotNetBoilerplate
 {
@@ -14,10 +16,14 @@ namespace SequenceDotNetBoilerplate
         private const string TokenContractAddress = "0xd2926e2ee243e8df781ab907b48f77ec5d7a8be1";
         private const string SaleContractAddress = "0x476f14887372e21fea64baba11c849b518a2e928";
         
+        private static readonly string WaaSConfigKey = Environment.GetEnvironmentVariable("WAAS_CONFIG_KEY") ?? "";
+        private static readonly string BuilderApiKey = Environment.GetEnvironmentVariable("PROJECT_ACCESS_KEY") ?? "";
+        private static readonly string EoaPrivateKey = Environment.GetEnvironmentVariable("EOA_PRIVATE_KEY") ?? "";
+        
         private static readonly SequenceConfigBase Config = new SequenceConfigBase
         {
-            WaaSConfigKey = "eyJwcm9qZWN0SWQiOjIwNSwicnBjU2VydmVyIjoiaHR0cHM6Ly93YWFzLnNlcXVlbmNlLmFwcCJ9",
-            BuilderAPIKey = "EGBjtLEdovfU6GHd4OUpsvZAAAAAAAAAA",
+            WaaSConfigKey = WaaSConfigKey,
+            BuilderAPIKey = BuilderApiKey,
             WaaSVersion = "DotNet (3.19.5)"
         };
         
@@ -26,12 +32,29 @@ namespace SequenceDotNetBoilerplate
         public static async Task Main()
         {
             SequenceConfig.SetConfig(Config);
-            await LoginAsync();
+            
+            // Wallet address needs gas funds to perform the transaction 
+            //CreateWalletFromPrivateKey();
+            //await TestMintTransaction();
+
+            await LoginAsGuest();
             await TestSaleTransaction();
+            
             await TestIndexer();
         }
+
+        private static void CreateWalletFromPrivateKey()
+        {
+            _wallet = new EOAWalletToSequenceWalletAdapter(new EOAWallet(EoaPrivateKey));
+
+            // Approve this public address on your contract when you want to mint tokens to your players 
+            var walletAddress = _wallet.GetWalletAddress();
+            LogHandler.Info($"Wallet Created: {walletAddress}");
+        }
     
-        private static async Task LoginAsync()
+        // Example on how to manually create a guest account
+        // Credentials are not stored and you will lose access on restart.
+        private static async Task LoginAsGuest()
         {
             var done = false;
             SequenceWallet.OnWalletCreated += wallet =>
@@ -52,6 +75,18 @@ namespace SequenceDotNetBoilerplate
     
             while (!done)
                 await Task.Delay(100);
+        }
+        
+        private static async Task TestMintTransaction()
+        {
+            var sale = new ERC1155(TokenContractAddress);
+            var fn = sale.Mint(_wallet.GetWalletAddress(), new BigInteger(1), new BigInteger(1));
+            var response = await _wallet.SendTransaction(CurrentChain, new Transaction[] {new RawTransaction(fn)});
+            
+            if (response is SuccessfulTransactionReturn success)
+                LogHandler.Info($"Successful Transaction: {success.txHash}");
+            else if (response is FailedTransactionReturn failed)
+                LogHandler.Info($"Error during Transaction: {failed.error}");
         }
 
         private static async Task TestSaleTransaction()
