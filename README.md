@@ -5,7 +5,7 @@ The Sequence .NET port (`SequenceDotNet.dll`) was built based on the Sequence Un
 ## .NET Project
 
 - Console Application
-- .NET Framework 7.0
+- .NET 7.0
 - C# 11.0
 
 ## Dockerfile
