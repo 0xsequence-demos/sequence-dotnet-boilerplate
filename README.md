@@ -8,6 +8,10 @@ The Sequence .NET port (`SequenceDotNet.dll`) was built based on the Sequence Un
 - .NET Framework 7.0
 - C# 11.0
 
+## Dockerfile
+
+Run the Dockerfile for a server-side integration using the .NET SDK 7.0.
+
 ## Features
 
 The `Program.cs` acts as an integration example.
