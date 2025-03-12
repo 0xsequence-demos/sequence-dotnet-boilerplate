@@ -27,6 +27,11 @@ The `Program.cs` acts as an integration example.
 - Send an ERC1155 Sale or Mint transaction
 - Use the Indexer API to check if the guest wallet owns the item 
 
+## Limitations
+
+- Does not support .NET Core
+- EOA wallet from the private key is not covered by gas sponsorship
+
 ## Dependencies
 
 - Newtonsoft.Json
